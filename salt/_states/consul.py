@@ -11,24 +11,18 @@ def external_service(name, datacenter, node, address, port, token=None):
         return ret
 
     # Determine if the node we're attempting to register exists
-    if __salt__["consul.node_exists"](node, address, dc=datacenter):
-        # Determine if the service we're attempting to register exists
-        if __salt__["consul.node_service_exists"](
-                node, name, port, dc=datacenter):
-            ret["result"] = True
-            ret["comment"] = (
-                "External Service {} already in the desired state.".format(
-                    name,
-                )
-            )
-            return ret
+    if __salt__["consul.node_exists"](
+        node, address, dc=datacenter
+    ) and __salt__["consul.node_service_exists"](
+        node, name, port, dc=datacenter
+    ):
+        ret["result"] = True
+        ret["comment"] = f"External Service {name} already in the desired state."
+        return ret
 
     if __opts__['test'] == True:
         ret['comment'] = 'The state of "{0}" will be changed.'.format(name)
-        ret['changes'] = {
-            'old': None,
-            'new': 'External Service {}'.format(name),
-        }
+        ret['changes'] = {'old': None, 'new': f'External Service {name}'}
         ret["result"] = None
         return ret
 
@@ -37,10 +31,7 @@ def external_service(name, datacenter, node, address, port, token=None):
     )
 
     ret["result"] = True
-    ret["comment"] = "Registered external service: '{}'.".format(name)
-    ret["changes"] = {
-        "old": None,
-        "new": 'External Service {}'.format(name),
-    }
+    ret["comment"] = f"Registered external service: '{name}'."
+    ret["changes"] = {"old": None, "new": f'External Service {name}'}
 
     return ret

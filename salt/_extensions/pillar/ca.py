@@ -10,8 +10,7 @@ import OpenSSL
 
 
 def compound(tgt, minion_id=None):
-    opts = {'grains': __grains__}
-    opts['id'] = minion_id
+    opts = {'grains': __grains__, 'id': minion_id}
     matcher = salt.loader.matchers(dict(__opts__, **opts))['compound_match.match']
     try:
         return matcher(tgt)
@@ -256,7 +255,7 @@ def create_ca_signed_cert(
             OpenSSL.crypto.X509Extension(
                 b"subjectAltName",
                 False,
-                ", ".join(["DNS:" + CN]).encode('utf-8'),
+                ", ".join([f"DNS:{CN}"]).encode('utf-8'),
             ),
             OpenSSL.crypto.X509Extension(
                 b"keyUsage",
@@ -324,7 +323,7 @@ def ext_pillar(minion_id, pillar, base="/etc/ssl", name="PSFCA", cert_opts=None)
             ]
             if role and role.get("pattern") is not None
         ]
-        if any([compound(pat, minion_id) for pat in role_patterns]):
+        if any(compound(pat, minion_id) for pat in role_patterns):
             # Create the options
             opts = cert_opts.copy()
             opts["CN"] = certificate

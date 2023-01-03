@@ -27,10 +27,7 @@ def cluster_ready():
     except (requests.HTTPError, requests.ConnectionError):
         return False
 
-    if json.loads(resp.content):
-        return True
-    else:
-        return False
+    return bool(json.loads(resp.content))
 
 
 def node_exists(name, address, dc=None):
@@ -44,11 +41,10 @@ def node_exists(name, address, dc=None):
     )
     resp.raise_for_status()
 
-    for node in json.loads(resp.content):
-        if node["Node"] == name and node["Address"] == address:
-            return True
-
-    return False
+    return any(
+        node["Node"] == name and node["Address"] == address
+        for node in json.loads(resp.content)
+    )
 
 
 def node_service_exists(node, service_name, port, dc=None):
@@ -57,16 +53,14 @@ def node_service_exists(node, service_name, port, dc=None):
         params["dc"] = dc
 
     resp = requests.get(
-        "http://127.0.0.1:8500/v1/catalog/node/{}".format(node),
-        params=params,
+        f"http://127.0.0.1:8500/v1/catalog/node/{node}", params=params
     )
     resp.raise_for_status()
 
-    for service in json.loads(resp.content)["Services"].values():
-        if service["Service"] == service_name and service["Port"] == port:
-            return True
-
-    return False
+    return any(
+        service["Service"] == service_name and service["Port"] == port
+        for service in json.loads(resp.content)["Services"].values()
+    )
 
 
 def register_external_service(node, address, datacenter, service, port, token):

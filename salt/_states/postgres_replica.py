@@ -1,13 +1,11 @@
 def slot(name):
     ret = {'name': name, 'changes': {}, 'result': False, 'comment': ''}
 
-    sql = "SELECT * FROM pg_replication_slots WHERE slot_name = '%s'" % name
+    sql = f"SELECT * FROM pg_replication_slots WHERE slot_name = '{name}'"
     if __salt__["postgres.psql_query"](sql):
-            ret["result"] = True
-            ret["comment"] = "Replication slot '{}' already exists.".format(
-                name,
-            )
-            return ret
+        ret["result"] = True
+        ret["comment"] = f"Replication slot '{name}' already exists."
+        return ret
 
     if __opts__['test']:
         ret['comment'] = 'Replication slot "{0}" will be created.'.format(name)
@@ -25,7 +23,7 @@ def slot(name):
     )
 
     ret["result"] = True
-    ret["comment"] = "Created replication slot: '{}'.".format(name)
+    ret["comment"] = f"Created replication slot: '{name}'."
     ret["changes"] = {
         "old": None,
         "new": name,

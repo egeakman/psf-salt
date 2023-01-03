@@ -32,8 +32,6 @@ def managed(name, domain, ipv4=[], ipv6=[]):
     node = zone.get_node(node_name)
 
     to_delete = []
-    to_add = []
-
     try:
         # Look at all of the IPv4 Addresses
         for record in node.get_all_records_by_type("A"):
@@ -51,17 +49,12 @@ def managed(name, domain, ipv4=[], ipv6=[]):
     except dyn.tm.errors.DynectGetError:
         pass
 
-    # Add any new IPv4 Addresses
-    for address in ipv4:
-        to_add.append((node_name, "A", address))
-
+    to_add = [(node_name, "A", address) for address in ipv4]
     # Add any new IPv6 Addresses
-    for address in ipv6:
-        to_add.append((node_name, "AAAA", address))
-
+    to_add.extend((node_name, "AAAA", address) for address in ipv6)
     if not to_delete and not to_add:
         ret['result'] = True
-        ret["comment"] = "DNS for {} already correct.".format(name)
+        ret["comment"] = f"DNS for {name} already correct."
         return ret
 
     if __opts__['test'] == True:

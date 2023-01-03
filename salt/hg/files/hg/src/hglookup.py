@@ -42,17 +42,17 @@ class hglookup(object):
         elif node.startswith('hg') or node in self.hg_commits:
             if node.startswith('hg'):
                 node = node[len('hg'):]
-            url = 'https://hg.python.org/cpython/rev/' + node
+            url = f'https://hg.python.org/cpython/rev/{node}'
             return self.successful_response(response, url)
         elif node.startswith('r'):
-            url = 'http://svn.python.org/view?view=revision&revision=' + node[1:]
+            url = f'http://svn.python.org/view?view=revision&revision={node[1:]}'
             return self.successful_response(response, url)
         elif not node.startswith('git') and len(node) not in {10, 11, 40}:
             return self.failed_response(response)
         else:
             if node.startswith('git'):
                 node = node[len('git'):]
-            url = 'https://github.com/python/cpython/commit/' + node
+            url = f'https://github.com/python/cpython/commit/{node}'
             return self.successful_response(response, url)
 
 

@@ -23,7 +23,7 @@ class ScriptFixerMiddleware(object):
 
             script_name = "/".join(parsed.path.split("/")[:1])
             if not script_name.startswith("/"):
-                script_name = "/" + script_name
+                script_name = f"/{script_name}"
 
             environ["SCRIPT_NAME"] = script_name
             environ["PATH_INFO"] = "/".join(parsed.path.split("/")[1:])

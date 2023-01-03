@@ -40,10 +40,10 @@ def bootstrap(host, codename="trusty", pre=[sync_changes]):
         host += ".iad1.psf.io"
 
     # SSH into the root user of this server and bootstrap the server.
-    with ssh_host("root@" + host):
+    with ssh_host(f"root@{host}"):
         # Make sure this host hasn't already been bootstrapped.
         if fabric.contrib.files.exists("/etc/salt/minion.d/local.conf"):
-            raise RuntimeError("{} is already bootstrapped.".format(host))
+            raise RuntimeError(f"{host} is already bootstrapped.")
 
         fabric.api.run("wget -O - https://repo.saltstack.com/apt/ubuntu/14.04/amd64/2018.3/SALTSTACK-GPG-KEY.pub | apt-key add -")
         if codename == "trusty":
@@ -51,7 +51,7 @@ def bootstrap(host, codename="trusty", pre=[sync_changes]):
         elif codename == "xenial":
             fabric.api.run("echo 'deb http://repo.saltstack.com/apt/ubuntu/16.04/amd64/2018.3 xenial main' > /etc/apt/sources.list.d/saltstack.list")
         else:
-            raise RuntimeError("{} is not supported!".format(codename))
+            raise RuntimeError(f"{codename} is not supported!")
 
         # Then we need to update our local apt
         fabric.api.run("apt-get update -qy")
@@ -91,11 +91,11 @@ def bootstrap(host, codename="trusty", pre=[sync_changes]):
 
     # SSH into our salt master and accept the key for this server.
     with ssh_host("salt.iad1.psf.io"):
-        fabric.api.sudo("salt-key -ya {}".format(minion_id))
+        fabric.api.sudo(f"salt-key -ya {minion_id}")
 
     # Finally SSH into our server one more time to run salt-call
     # state.highstate for real this time.
-    with ssh_host("root@" + host):
+    with ssh_host(f"root@{host}"):
         fabric.api.run("salt-call state.highstate")
 
         # Reboot the server to make sure any upgrades have been loaded.
@@ -114,7 +114,7 @@ def highstate(hosts, dc="iad1"):
 
     # Loop over all the hosts and if they do not have a ., then we'll add
     # .psf.io to them.
-    hosts = [h if "." in h else h + "." + dc + ".psf.io" for h in hosts]
+    hosts = [h if "." in h else f"{h}.{dc}.psf.io" for h in hosts]
 
     # Loop over all the hosts and call salt-call state.highstate on them.
     for host in hosts:
